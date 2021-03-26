@@ -20,8 +20,25 @@ class App extends Component {
       input: '',
       imgUrl:'',
       box: {},
-      route: "signin"
+      route: "signin",
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
     }
+  }
+
+  loadUser = (data) => {
+    this.setState({user: {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      entries: data.entries,
+      joined: data.joined
+    }})
   }
 
   onInputChange = (event) => {
@@ -52,6 +69,18 @@ class App extends Component {
         Clarifai.FACE_DETECT_MODEL,
         this.state.input)
       .then(response => {
+        if(response) {
+          fetch("http://localhost:3000/image", {
+            method: 'put',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                id: this.state.user.id
+            })
+          })
+          .then(response => response.json())
+          .then(count => this.setState(Object.assign(this.state.user, {entries: count})))
+        }
+
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
       .catch(err => console.log(err));
@@ -66,16 +95,16 @@ class App extends Component {
       <div className="App">
         <Nav onRouteChange={ this.onRouteChange } route={ this.state.route }/>
         {this.state.route === 'signin'?
-          <SignIn onRouteChange={ this.onRouteChange }/>
+          <SignIn onRouteChange={ this.onRouteChange } loadUser={ this.loadUser }/>
         :<div>
           {this.state.route === 'home'?
           <div>
             <Logo />
-            <Rank />
+            <Rank name={this.state.user.name} entries={this.state.user.entries} />
             <ImgInput onInputChange = {this.onInputChange} onButtonChange = {this.onButtonChange}/>
             <ImgDisply url={ this.state.imgUrl } box={this.state.box}/>
           </div>
-          :<Register onRouteChange={ this.onRouteChange }/>}
+          :<Register onRouteChange={this.onRouteChange} loadUser ={this.loadUser} />}
         </div>}
       </div>
   );
