@@ -23,7 +23,7 @@ class Register extends React.Component {
     }
 
     onSubmitChange = () => {
-        fetch('http://182.92.74.231:8080/register',{
+        fetch('/api/register',{
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({

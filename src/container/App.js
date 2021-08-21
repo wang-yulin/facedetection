@@ -59,7 +59,7 @@ class App extends Component {
 
   onButtonChange = () => {
     this.setState({imgUrl: this.state.input})
-    fetch("http://182.92.74.231:8080/image", {
+    fetch("/api/image", {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -69,7 +69,7 @@ class App extends Component {
       .then(response => response.json())
       .then(response => {
         if(response) {
-          fetch("http://182.92.74.231:8080/image", {
+          fetch("/api/image", {
             method: 'put',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
