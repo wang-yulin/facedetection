@@ -9,6 +9,7 @@ class SignIn extends React.Component {
             isValid: false,
         }
     }
+
     onEmailChange = (event) => {
         this.setState({signInEmail: event.target.value})
     }
@@ -17,9 +18,10 @@ class SignIn extends React.Component {
         this.setState({signInPassword: event.target.value})
     }
 
-    onSubmitSignIn = () => {
+    onSubmitSignIn = (event) => {
+        event.preventDefault();
         if (this.state.signInEmail && this.state.signInPassword) {
-           fetch('/api/signin', {
+            fetch('/api/signin', {
                 method: 'post',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -30,13 +32,13 @@ class SignIn extends React.Component {
             .then(response => response.json())
             .then(user => {
                 if (user.id) {
-                    this.setState({isValid: false});
+                    this.setState({isValid: false})
                     this.props.loadUser(user);
                     this.props.onRouteChange('home');
                 } else {
                     this.setState({isValid: true})
                 }
-            }) 
+            })
         } 
     }
 
@@ -45,7 +47,7 @@ class SignIn extends React.Component {
         return (
             <div className="br3 shadow-5 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 center">
             <main className="pa4 black-80 ">
-                <form className="measure">
+                <form className="measure" onSubmit={this.onSubmitSignIn}>
                     <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
                     <legend className="f1 fw6 ph0 mh0">Sign In</legend>
                     <div className="mt3">
@@ -74,12 +76,11 @@ class SignIn extends React.Component {
                     </div>
                     </fieldset>
                     <div className="">
-                    <input 
-                        onClick= { this.onSubmitSignIn } 
+                    <button
                         className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" 
                         type="submit" 
-                        value="Sign in" 
-                    />
+                    >Sign In
+                    </button>
                     </div>
                     {this.state.isValid && <span className="error">Email or Password is wrong!</span>}
                     <div className="lh-copy mt3">
