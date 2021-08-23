@@ -7,6 +7,19 @@ import ImgDisply from '../components/ImgDisplay/ImgDisplay';
 import SignIn from '../components/SignIn/SignIn';
 import Register from '../components/Register/Register';
 import { Component } from 'react';
+import Particles from 'react-particles-js';
+
+const particlesOptions = {
+  particles: {
+    number: {
+      value: 30,
+      density: {
+        enable: true,
+        value_area: 800
+      }
+    }
+  }
+}
 
 class App extends Component {
   constructor() {
@@ -93,6 +106,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <Particles className='particles'
+          params={particlesOptions}
+        />
         <Nav onRouteChange={ this.onRouteChange } route={ this.state.route }/>
         {this.state.route === 'signin'?
           <SignIn onRouteChange={ this.onRouteChange } loadUser={ this.loadUser }/>
