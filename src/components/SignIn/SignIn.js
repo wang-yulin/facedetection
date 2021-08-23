@@ -18,14 +18,15 @@ class SignIn extends React.Component {
     }
 
     onSubmitSignIn = () => {
-        fetch('/api/signin', {
-            method: 'post',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                email: this.state.signInEmail,
-                password: this.state.signInPassword
+        if (this.state.signInEmail && this.state.signInPassword) {
+           fetch('/api/signin', {
+                method: 'post',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    email: this.state.signInEmail,
+                    password: this.state.signInPassword
+                })
             })
-        })
             .then(response => response.json())
             .then(user => {
                 if (user.id) {
@@ -35,7 +36,8 @@ class SignIn extends React.Component {
                 } else {
                     this.setState({isValid: true})
                 }
-            })
+            }) 
+        } 
     }
 
     render() {
@@ -51,7 +53,7 @@ class SignIn extends React.Component {
                         <input 
                             onChange={ this.onEmailChange } 
                             className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
-                            type="email" 
+                            type="text" 
                             name="email-address"  
                             id="email-address" 
                             placeholder="Email address"

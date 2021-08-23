@@ -101,7 +101,7 @@ class Register extends React.Component {
                             onChange={this.handleInputChange} 
                             value={this.state.email} 
                             className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
-                            type="email" 
+                            type="text" 
                             name="email"  
                             id="email-address" 
                             placeholder="Email"
