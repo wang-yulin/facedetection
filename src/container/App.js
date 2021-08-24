@@ -1,4 +1,3 @@
-import './App.css';
 import Nav from '../components/Nav/Nav';
 import Logo from '../components/Logo/Logo';
 import Rank from '../components/Rank/Rank';
@@ -8,6 +7,7 @@ import SignIn from '../components/SignIn/SignIn';
 import Register from '../components/Register/Register';
 import { Component } from 'react';
 import Particles from 'react-particles-js';
+import './App.css';
 
 const particlesOptions = {
   particles: {
@@ -27,7 +27,7 @@ class App extends Component {
     this.state = {
       input: '',
       imgUrl:'',
-      box: {},
+      boxes: [],
       route: "signin",
       user: {
         id: '',
@@ -53,26 +53,28 @@ class App extends Component {
     this.setState({input: event.target.value})
   }
 
-  calculateFaceLocation = (data) => {
-    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
-    const image = document.getElementById('inputimage');
-    const width = Number(image.width);
-    const height = Number(image.height);
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      bottomRow: height - (clarifaiFace.bottom_row * height)
-    }
+  calculateFaceLocations = (data) => {
+    return data.outputs[0].data.regions.map(face => {
+      const clarifaiFace = face.region_info.bounding_box;
+      const image = document.getElementById('inputimage');
+      const width = Number(image.width);
+      const height = Number(image.height);
+      return {
+        leftCol: clarifaiFace.left_col * width,
+        topRow: clarifaiFace.top_row * height,
+        rightCol: width - (clarifaiFace.right_col * width),
+        bottomRow: height - (clarifaiFace.bottom_row * height)
+      }
+    });
   }
 
-  displayFaceBox = (box) => {
-    this.setState({box: box});
+  displayFaceBoxes = (boxes) => {
+    this.setState({boxes: boxes});
   }
 
   onButtonChange = () => {
     this.setState({imgUrl: this.state.input})
-    fetch("/api/image", {
+    fetch("http://localhost:3000/image", {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -82,7 +84,7 @@ class App extends Component {
       .then(response => response.json())
       .then(response => {
         if(response) {
-          fetch("/api/image", {
+          fetch("http://localhost:3000/image", {
             method: 'put',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -94,7 +96,7 @@ class App extends Component {
           .catch(console.log)
         }
 
-        this.displayFaceBox(this.calculateFaceLocation(response));
+        this.displayFaceBoxes(this.calculateFaceLocations(response));
       })
       .catch(err => console.log(err));
   }
@@ -104,21 +106,22 @@ class App extends Component {
   }
 
   render() {
+    const { imgUrl, route, boxes } = this.state;
     return (
       <div className="App">
         <Particles className='particles'
           params={particlesOptions}
         />
-        <Nav onRouteChange={ this.onRouteChange } route={ this.state.route }/>
-        {this.state.route === 'signin'?
+        <Nav onRouteChange={ this.onRouteChange } route={ route }/>
+        {route === 'signin'?
           <SignIn onRouteChange={ this.onRouteChange } loadUser={ this.loadUser }/>
         :<div>
-          {this.state.route === 'home'?
+          {route === 'home'?
           <div>
             <Logo />
             <Rank name={this.state.user.name} entries={this.state.user.entries} />
             <ImgInput onInputChange = {this.onInputChange} onButtonChange = {this.onButtonChange}/>
-            <ImgDisply url={ this.state.imgUrl } box={this.state.box}/>
+            <ImgDisply url={ imgUrl } boxes={boxes}/>
           </div>
           :<Register onRouteChange={this.onRouteChange} loadUser ={this.loadUser} />}
         </div>}
