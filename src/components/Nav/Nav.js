@@ -1,10 +1,14 @@
 import React from 'react';
+import ProfileIcon from '../Profile/ProfileIcon';
 
-const Nav = ({ onRouteChange, route }) => {
+const Nav = ({ onRouteChange, route, toggleModal }) => {
     if(route === "home"){
         return(
         <nav className='flex justify-end '>
-            <p onClick={()=>onRouteChange('signin') } className='f3 link dim black underline pa3 pointer ma0'>Sign Out</p>
+            <ProfileIcon 
+                onRouteChange={onRouteChange}
+                toggleModal={toggleModal}
+            />
         </nav>)
     } else {
         return(

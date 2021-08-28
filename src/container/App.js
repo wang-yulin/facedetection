@@ -1,3 +1,4 @@
+import { Component } from 'react';
 import Nav from '../components/Nav/Nav';
 import Logo from '../components/Logo/Logo';
 import Rank from '../components/Rank/Rank';
@@ -5,9 +6,11 @@ import ImgInput from '../components/ImgInput/ImgInput';
 import ImgDisply from '../components/ImgDisplay/ImgDisplay';
 import SignIn from '../components/SignIn/SignIn';
 import Register from '../components/Register/Register';
-import { Component } from 'react';
+import Modal from '../components/Modal/Modal';
+import Profile from '../components/Profile/Profile';
 import Particles from 'react-particles-js';
 import './App.css';
+
 
 const particlesOptions = {
   particles: {
@@ -29,13 +32,49 @@ class App extends Component {
       imgUrl:'',
       boxes: [],
       route: "signin",
+      isProfileOpen: false,
       user: {
         id: '',
         name: '',
         email: '',
         entries: 0,
-        joined: ''
+        joined: '',
+        age: '',
+        pet: ''
       }
+    }
+  }
+
+  componentDidMount() {
+    const token = window.sessionStorage.getItem('token');
+    if (token) {
+      fetch('http://localhost:3000/signin', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        if (data && data.id) {
+          fetch(`http://localhost:3000/profile/${data.id}`, {
+            method: 'get',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            }
+          })
+          .then(resp => resp.json())
+          .then(user => {
+            if (user && user.email) {
+              this.loadUser(user);
+              this.onRouteChange('home');
+            }
+          })
+        }
+      })
+      .catch(console.log)
     }
   }
 
@@ -45,8 +84,10 @@ class App extends Component {
       name: data.name,
       email: data.email,
       entries: data.entries,
-      joined: data.joined
-    }, imgUrl: ''})
+      joined: data.joined,
+      age: data.age,
+      pet: data.pet
+    }})
   }
 
   onInputChange = (event) => {
@@ -54,29 +95,37 @@ class App extends Component {
   }
 
   calculateFaceLocations = (data) => {
-    return data.outputs[0].data.regions.map(face => {
-      const clarifaiFace = face.region_info.bounding_box;
-      const image = document.getElementById('inputimage');
-      const width = Number(image.width);
-      const height = Number(image.height);
-      return {
-        leftCol: clarifaiFace.left_col * width,
-        topRow: clarifaiFace.top_row * height,
-        rightCol: width - (clarifaiFace.right_col * width),
-        bottomRow: height - (clarifaiFace.bottom_row * height)
-      }
-    });
+    if (data && data.outputs) {
+      return data.outputs[0].data.regions.map(face => {
+        const clarifaiFace = face.region_info.bounding_box;
+        const image = document.getElementById('inputimage');
+        const width = Number(image.width);
+        const height = Number(image.height);
+        return {
+          leftCol: clarifaiFace.left_col * width,
+          topRow: clarifaiFace.top_row * height,
+          rightCol: width - (clarifaiFace.right_col * width),
+          bottomRow: height - (clarifaiFace.bottom_row * height)
+        }
+      });
+    }
+    return;
   }
 
   displayFaceBoxes = (boxes) => {
-    this.setState({boxes: boxes});
+    if (boxes) {
+      this.setState({boxes: boxes});
+    }
   }
 
   onButtonChange = () => {
     this.setState({imgUrl: this.state.input})
     fetch("http://localhost:3000/image", {
             method: 'post',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': window.sessionStorage.getItem('token')
+            },
             body: JSON.stringify({
                 input: this.state.input
             })
@@ -86,7 +135,10 @@ class App extends Component {
         if(response) {
           fetch("http://localhost:3000/image", {
             method: 'put',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': window.sessionStorage.getItem('token')
+            },
             body: JSON.stringify({
                 id: this.state.user.id
             })
@@ -105,14 +157,35 @@ class App extends Component {
     this.setState({ route: route})
   }
 
+  toggleModal = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      isProfileOpen: !prevState.isProfileOpen
+    }))
+  }
+
   render() {
-    const { imgUrl, route, boxes } = this.state;
+    const { imgUrl, route, boxes, isProfileOpen, user } = this.state;
     return (
       <div className="App">
         <Particles className='particles'
           params={particlesOptions}
         />
-        <Nav onRouteChange={ this.onRouteChange } route={ route }/>
+        <Nav 
+          onRouteChange={ this.onRouteChange } 
+          route={ route }
+          toggleModal={this.toggleModal}
+        />
+        { isProfileOpen && 
+          <Modal>
+              <Profile 
+                isProfileOpen={isProfileOpen} 
+                toggleModal={this.toggleModal}
+                loadUser={this.loadUser}
+                user={user}
+              />
+          </Modal>
+        }
         {route === 'signin'?
           <SignIn onRouteChange={ this.onRouteChange } loadUser={ this.loadUser }/>
         :<div>
@@ -123,7 +196,14 @@ class App extends Component {
             <ImgInput onInputChange = {this.onInputChange} onButtonChange = {this.onButtonChange}/>
             <ImgDisply url={ imgUrl } boxes={boxes}/>
           </div>
-          :<Register onRouteChange={this.onRouteChange} loadUser ={this.loadUser} />}
+          :<div>
+            {route === "register"?
+             <Register onRouteChange={this.onRouteChange} loadUser ={this.loadUser} />
+             :
+             <SignIn onRouteChange={ this.onRouteChange } loadUser={ this.loadUser }/>
+            }
+          </div>
+         }
         </div>}
       </div>
   );

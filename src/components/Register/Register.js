@@ -85,7 +85,7 @@ class Register extends React.Component {
                         <input 
                             onChange={this.handleInputChange} 
                             value={this.state.fullName} 
-                            className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
+                            className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 hover-black" 
                             type="text" 
                             required
                             name="fullName"  
@@ -93,14 +93,14 @@ class Register extends React.Component {
                             placeholder="Name"
                         />
                         {errors.fullName.length > 0 && 
-                            <span className="error">{errors.fullName}</span>}
+                            <span className="error db">{errors.fullName}</span>}
                     </div>
                     <div className="mt3">
                         <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
                         <input 
                             onChange={this.handleInputChange} 
                             value={this.state.email} 
-                            className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
+                            className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 hover-black" 
                             type="text" 
                             name="email"  
                             id="email-address" 
@@ -108,14 +108,14 @@ class Register extends React.Component {
                             required
                         />
                         {errors.email.length > 0 &&
-                            <span className="error">{errors.email}</span>}
+                            <span className="error db">{errors.email}</span>}
                     </div>
                     <div className="mv3">
                         <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
                         <input 
                             onChange={this.handleInputChange} 
                             value={this.state.password} 
-                            className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
+                            className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 hover-black" 
                             type="password" 
                             name="password"  
                             id="password" 
@@ -123,7 +123,7 @@ class Register extends React.Component {
                             required
                         />
                         {errors.password.length > 0 &&
-                            <span className="error">{errors.password}</span>}
+                            <span className="error db">{errors.password}</span>}
                     </div>
                     </fieldset>
                     <div className="">
